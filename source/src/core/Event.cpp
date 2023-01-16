@@ -1,8 +1,6 @@
 #include "DESCommon.h"
 #include "core/Event.h"
 
-#include <sstream>
-
 namespace des
 {
 
