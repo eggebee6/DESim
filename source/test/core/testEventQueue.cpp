@@ -6,9 +6,7 @@ using namespace des;
 
 TEST(testEventQueue, ctor)
 {
-  {
-    ASSERT_NO_THROW(EventQueue{});
-  }
+  ASSERT_NO_THROW(EventQueue{});
 
   EventQueue q{};
 
