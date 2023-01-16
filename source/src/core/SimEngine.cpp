@@ -66,7 +66,7 @@ void SimEngine::initialize()
     for(auto handler : handlers)
     {
       assert(handler);
-      handler->finalize(*this);
+      handler->initialize(*this);
     }
 
     _state = SimEngineState::Running;
