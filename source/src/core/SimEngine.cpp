@@ -72,7 +72,7 @@ void SimEngine::initialize()
     _state = SimEngineState::Running;
     return;
   }
-  catch(const std::exception&)
+  catch(...)
   {
     _state = SimEngineState::Error;
     throw;
@@ -121,7 +121,11 @@ Event SimEngine::step()
     _time = evt.time();
     return evt;
   }
-  catch(const std::exception&)
+  catch(const CausalityException&)
+  {
+    throw;
+  }
+  catch(...)
   {
     _state = SimEngineState::Error;
     throw;
@@ -147,7 +151,7 @@ void SimEngine::finalize()
     _state = SimEngineState::Finalized;
     return;
   }
-  catch(const std::exception&)
+  catch(...)
   {
     _state = SimEngineState::Error;
     throw;
