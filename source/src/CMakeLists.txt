@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.14)
 set (SRCS_CORE
   "core/Event.cpp"
   "core/EventQueue.cpp"
+  "core/SimEngine.cpp"
 )
 
 add_library (des

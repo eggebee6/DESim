@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.14)
 set (SRCS_TEST
   testEvent.cpp
   testEventQueue.cpp
+  testSimEngine.cpp
 )
   
 add_executable (testCore
