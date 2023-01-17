@@ -100,6 +100,9 @@ Event SimEngine::step()
       throw CausalityException(evt, "Event violates causality");
     }
 
+    // Update simulation time
+    _time = evt.time();
+
     // Pass event to all global handlers
     for(auto handler : _globalHandlers)
     {
@@ -118,7 +121,6 @@ Event SimEngine::step()
       }
     }
 
-    _time = evt.time();
     return evt;
   }
   catch(const CausalityException&)
