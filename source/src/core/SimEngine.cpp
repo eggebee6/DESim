@@ -134,7 +134,7 @@ Event SimEngine::step()
 
 void SimEngine::finalize()
 {
-  if(_state != SimEngineState::Finalized)
+  if(_state != SimEngineState::Running)
   {
     throw std::runtime_error("Simulation is not Finalized");
   }
