@@ -60,12 +60,52 @@ TEST(testSimEngine, insert)
 
 TEST(testSimEngine, initialize)
 {
-  FAIL() << "Not implemented";
+  SimEngine sim{};
+
+  MockHandler h1{};
+  MockHandler h2{};
+  
+  sim.subscribe(&h1);
+  sim.subscribe(&h2, 1);
+  sim.subscribe(&h2, 2);
+
+  // Each subscribed handlers should receive only one call to initialize
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, initialize(Ref(sim))).Times(1);
+
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, initialize).Times(0);
+  EXPECT_CALL(h2, initialize).Times(0);
+  ASSERT_THROW(sim.initialize(), std::runtime_error);
 }
 
 TEST(testSimEngine, finalize)
 {
-  FAIL() << "Not implemented";
+  SimEngine sim{};
+
+  MockHandler h1{};
+  MockHandler h2{};
+  
+  sim.subscribe(&h1);
+  sim.subscribe(&h2, 1);
+  sim.subscribe(&h2, 2);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, initialize(Ref(sim))).Times(1);
+  sim.initialize();
+
+  // Each subscribed handlers should receive only one call to finalize
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, finalize(Ref(sim))).Times(1);
+
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
+
+  EXPECT_CALL(h1, finalize).Times(0);
+  EXPECT_CALL(h2, finalize).Times(0);
+  ASSERT_THROW(sim.finalize(), std::runtime_error);
 }
 
 TEST(testSimEngine, step_no_handlers)
@@ -129,6 +169,76 @@ TEST(testSimEngine, step_no_handlers)
   EXPECT_EQ(0, sim.eventCount());
   ASSERT_EQ(3, sim.time());
   ASSERT_EQ(SimEngineState::Running, sim.state());
+}
+
+TEST(testSimEngine, subscriptions)
+{
+  SimEngine sim{};
+
+  MockHandler h1{};
+  MockHandler h2{};
+  MockHandler h3{};
+
+  decltype(sim.getAllHandlers()) handlers{};
+
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(0, handlers.size());
+
+  // Subscribe h1 to all events
+  ASSERT_NO_THROW(sim.subscribe(&h1));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(1, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+
+  // Subscribe h1 again
+  ASSERT_NO_THROW(sim.subscribe(&h1));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(1, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+
+  // Subscribe h2 to events 1 and 2
+  ASSERT_NO_THROW(sim.subscribe(&h2, 1));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(2, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+
+  ASSERT_NO_THROW(sim.subscribe(&h2, 2));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(2, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+
+  // Subscribe h2 to event 2 again
+  ASSERT_NO_THROW(sim.subscribe(&h2, 2));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(2, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+
+  // Subscribe h3 to all events
+  ASSERT_NO_THROW(sim.subscribe(&h3));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(3, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+  ASSERT_TRUE(handlers.count(&h3) > 0);
+
+  // Resubscribe h3 to event 3
+  ASSERT_NO_THROW(sim.subscribe(&h3, 3));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(3, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+  ASSERT_TRUE(handlers.count(&h3) > 0);
+
+  // Resubscribe h3 to all events
+  ASSERT_NO_THROW(sim.subscribe(&h3));
+  ASSERT_NO_THROW(handlers = sim.getAllHandlers());
+  EXPECT_EQ(3, handlers.size());
+  ASSERT_TRUE(handlers.count(&h1) > 0);
+  ASSERT_TRUE(handlers.count(&h2) > 0);
+  ASSERT_TRUE(handlers.count(&h3) > 0);
 }
 
 TEST(testSimEngine, step)
