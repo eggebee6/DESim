@@ -22,6 +22,9 @@ namespace _testSimEngine
     MOCK_METHOD1(initialize, void(SimEngine& sim));
     MOCK_METHOD1(finalize, void(SimEngine& sim));
   };
+
+  MATCHER_P(EventEQ, evt, "Event matcher")
+  { return ((evt.time() == arg.time()) && (evt.type() == arg.type())); }
 }
 using namespace _testSimEngine;
 
@@ -241,7 +244,243 @@ TEST(testSimEngine, subscriptions)
   ASSERT_TRUE(handlers.count(&h3) > 0);
 }
 
-TEST(testSimEngine, step)
+TEST(testSimEngine, resubscribe_to_type)
 {
-  FAIL() << "Not implemented";
+  Event e1{1, 10};
+  Event e2{2, 20};
+  Event e3{3, 30};
+  Event e4{4, 20};
+  Event e5{5, 10};
+
+  SimEngine sim{};
+  sim.insertEvent(e1);
+  sim.insertEvent(e2);
+  sim.insertEvent(e3);
+  sim.insertEvent(e4);
+  sim.insertEvent(e5);
+
+  MockHandler h1{};
+
+  // Subscribe h1 to all events
+  sim.subscribe(&h1);
+
+  // Subscribe h1 to events 20 and 30
+  sim.subscribe(&h1, 20);
+  sim.subscribe(&h1, 30);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+
+  // Process all events
+  while(sim.hasNextEvent())
+  {
+    ASSERT_NO_THROW(sim.step());
+  }
+
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
+}
+
+TEST(testSimEngine, resubscribe_to_all)
+{
+  Event e1{1, 10};
+  Event e2{2, 20};
+  Event e3{3, 30};
+  Event e4{4, 20};
+  Event e5{5, 10};
+
+  SimEngine sim{};
+  sim.insertEvent(e1);
+  sim.insertEvent(e2);
+  sim.insertEvent(e3);
+  sim.insertEvent(e4);
+  sim.insertEvent(e5);
+
+  MockHandler h1{};
+
+  // Subscribe h1 to events 20 and 30
+  sim.subscribe(&h1, 20);
+  sim.subscribe(&h1, 30);
+
+  // Subscribe h1 to all events
+  sim.subscribe(&h1);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e1))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e5))).Times(1);
+
+  // Process all events
+  while(sim.hasNextEvent())
+  {
+    ASSERT_NO_THROW(sim.step());
+  }
+
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
+}
+
+TEST(testSimEngine, step_1_handler)
+{
+  Event e1{1, 10};
+  Event e2{2, 20};
+  Event e3{3, 30};
+  Event e4{4, 20};
+  Event e5{5, 10};
+
+  SimEngine sim{};
+  sim.insertEvent(e1);
+  sim.insertEvent(e2);
+  sim.insertEvent(e3);
+  sim.insertEvent(e4);
+  sim.insertEvent(e5);
+
+  MockHandler h1{};
+
+  // Subscribe h1 to all events
+  sim.subscribe(&h1);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e1))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e5))).Times(1);
+
+  // Process all events
+  while(sim.hasNextEvent())
+  {
+    ASSERT_NO_THROW(sim.step());
+  }
+
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
+}
+
+TEST(testSimEngine, step_2_handlers)
+{
+  Event e1{1, 10};
+  Event e2{2, 20};
+  Event e3{3, 30};
+  Event e4{4, 20};
+  Event e5{5, 10};
+
+  SimEngine sim{};
+  sim.insertEvent(e1);
+  sim.insertEvent(e2);
+  sim.insertEvent(e3);
+  sim.insertEvent(e4);
+  sim.insertEvent(e5);
+
+  MockHandler h1{};
+  MockHandler h2{};
+
+  // Subscribe h1 to all events
+  sim.subscribe(&h1);
+
+  // Subscribe h2 to events 20 and 30
+  sim.subscribe(&h2, 20);
+  sim.subscribe(&h2, 30);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, initialize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e1))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e5))).Times(1);
+
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+
+  // Process all events
+  while(sim.hasNextEvent())
+  {
+    sim.step();
+  }
+
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, finalize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
+}
+
+TEST(testSimEngine, step_3_handlers)
+{
+  Event e1{1, 10};
+  Event e2{2, 20};
+  Event e3{3, 30};
+  Event e4{4, 20};
+  Event e5{5, 10};
+
+  SimEngine sim{};
+  sim.insertEvent(e1);
+  sim.insertEvent(e2);
+  sim.insertEvent(e3);
+  sim.insertEvent(e4);
+  sim.insertEvent(e5);
+
+  MockHandler h1{};
+  MockHandler h2{};
+  MockHandler h3{};
+
+  // Subscribe h1 to all events
+  sim.subscribe(&h1);
+
+  // Subscribe h2 to events 20 and 30
+  sim.subscribe(&h2, 20);
+  sim.subscribe(&h2, 30);
+
+  // Subscribe h3 to event 40
+  sim.subscribe(&h3, 40);
+
+  EXPECT_CALL(h1, initialize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, initialize(Ref(sim))).Times(1);
+  EXPECT_CALL(h3, initialize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.initialize());
+  ASSERT_EQ(SimEngineState::Running, sim.state());
+
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e1))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+  EXPECT_CALL(h1, handleEvent(Ref(sim), EventEQ(e5))).Times(1);
+
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e2))).Times(1);
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e3))).Times(1);
+  EXPECT_CALL(h2, handleEvent(Ref(sim), EventEQ(e4))).Times(1);
+
+  EXPECT_CALL(h3, handleEvent).Times(0);
+
+  // Process all events
+  while(sim.hasNextEvent())
+  {
+    sim.step();
+  }
+
+  EXPECT_CALL(h1, finalize(Ref(sim))).Times(1);
+  EXPECT_CALL(h2, finalize(Ref(sim))).Times(1);
+  EXPECT_CALL(h3, finalize(Ref(sim))).Times(1);
+  ASSERT_NO_THROW(sim.finalize());
+  ASSERT_EQ(SimEngineState::Finalized, sim.state());
 }
