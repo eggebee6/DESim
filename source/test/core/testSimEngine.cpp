@@ -24,7 +24,7 @@ namespace _testSimEngine
   };
 
   MATCHER_P(EventEQ, evt, "Event matcher")
-  { return ((evt.time() == arg.time()) && (evt.type() == arg.type())); }
+  { return ((evt.time() == arg.time()) && (evt.type() == arg.type()) && (evt.tag() == arg.tag())); }
 }
 using namespace _testSimEngine;
 
@@ -59,6 +59,36 @@ TEST(testSimEngine, insert)
   ASSERT_NO_THROW(sim.insertEvent(Event{2, 20}));
   ASSERT_TRUE(sim.hasNextEvent());
   ASSERT_EQ(2, sim.eventCount());
+
+  ASSERT_NO_THROW(sim.insertEvent(3, 30));
+  ASSERT_TRUE(sim.hasNextEvent());
+  ASSERT_EQ(3, sim.eventCount());
+
+  ASSERT_NO_THROW(sim.insertEvent(4, 40, 400));
+  ASSERT_TRUE(sim.hasNextEvent());
+  ASSERT_EQ(4, sim.eventCount());
+
+  sim.initialize();
+
+  Event res = sim.step();
+  EXPECT_EQ(1, res.time());
+  EXPECT_EQ(10, res.type());
+  EXPECT_EQ(0, res.tag());
+
+  res = sim.step();
+  EXPECT_EQ(2, res.time());
+  EXPECT_EQ(20, res.type());
+  EXPECT_EQ(0, res.tag());
+
+  res = sim.step();
+  EXPECT_EQ(3, res.time());
+  EXPECT_EQ(30, res.type());
+  EXPECT_EQ(0, res.tag());
+
+  res = sim.step();
+  EXPECT_EQ(4, res.time());
+  EXPECT_EQ(40, res.type());
+  EXPECT_EQ(400, res.tag());
 }
 
 TEST(testSimEngine, initialize)
@@ -122,7 +152,7 @@ TEST(testSimEngine, step_no_handlers)
 
   sim.insertEvent(Event{2, 20});
   sim.insertEvent(e1);
-  sim.insertEvent(e3);
+  sim.insertEvent(3, 30, 300);
 
   // Check step before being initialized
   ASSERT_THROW(sim.step(), std::runtime_error);

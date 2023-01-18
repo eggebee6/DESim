@@ -35,6 +35,16 @@ public:
   { _queue.push(std::move(e)); }
 
   /**
+   * @brief  Insert an event with the given parameters into the queue
+   * 
+   * @param evtTime  Event time
+   * @param evtType  Event type
+   * @param evtTag  Event tag
+   */
+  inline void insert(const SimTime evtTime, const EventType evtType, const EventTag evtTag = 0)
+  { _queue.emplace(evtTime, evtType, evtTag); }
+
+  /**
    * @brief  Get the next event from the queue
    *
    *  Event is removed from the queue

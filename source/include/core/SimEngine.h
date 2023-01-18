@@ -99,6 +99,16 @@ public:
   inline void insertEvent(Event&& evt)
   { _schedule.insert(std::move(evt)); }
 
+  /**
+   * @brief  Insert an event with the given parameters into the simulation schedule
+   * 
+   * @param evtTime  Event time
+   * @param evtType  Event type
+   * @param evtTag  Event tag
+   */
+  inline void insertEvent(const SimTime evtTime, const EventType evtType, const EventTag evtTag = 0)
+  { _schedule.insert(evtTime, evtType, evtTag); }
+
   /** @return True if simulation has an event in the schedule, false otherwise */
   inline bool hasNextEvent() const noexcept
   { return !_schedule.empty(); }
