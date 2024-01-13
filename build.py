@@ -76,7 +76,7 @@ def invoke_build(base_path, cmake_args):
     # TODO: Allow different build systems to be used
 
     # Run CMake
-    cmake_cmd = ["cmake", "-G", "NMake Makefiles"]
+    cmake_cmd = ["cmake", "-G", "MinGW Makefiles"]
     cmake_cmd.extend(cmake_args)
     cmake_cmd.append(str(base_path))
 
@@ -88,8 +88,8 @@ def invoke_build(base_path, cmake_args):
 
     proc.check_returncode()
 
-    # Run NMake
-    nmake_cmd = ["nmake"]
+    # Run Make
+    nmake_cmd = ["make"]
 
     proc = subprocess.run(
         nmake_cmd,
