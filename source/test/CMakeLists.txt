@@ -11,3 +11,4 @@ if (BUILD_WITH_COVERAGE)
 endif ()
 
 add_subdirectory (core)
+add_subdirectory (io)

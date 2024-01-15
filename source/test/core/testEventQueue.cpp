@@ -81,6 +81,30 @@ TEST(testEventQueue, queue)
   ASSERT_THROW(q.peekNext(), std::runtime_error);
   ASSERT_THROW(q.getNext(), std::runtime_error);
 
+  // Insert (from parameters) and remove one event
+  ASSERT_NO_THROW(q.insert(1, 10, 100));
+  EXPECT_EQ(1, q.size());
+  EXPECT_FALSE(q.empty());
+
+  // Check event
+  res = Event{0, 0};
+  ASSERT_NO_THROW(res = q.peekNext());
+  EXPECT_EQ(1, q.size());
+  EXPECT_FALSE(q.empty());
+  EXPECT_EQ(1, res.time());
+  EXPECT_EQ(10, res.type());
+  EXPECT_EQ(100, res.tag());
+
+  res = Event{0, 0};
+  ASSERT_NO_THROW(res = q.getNext());
+  EXPECT_EQ(0, q.size());
+  EXPECT_TRUE(q.empty());
+  EXPECT_EQ(1, res.time());
+  EXPECT_EQ(10, res.type());
+
+  ASSERT_THROW(q.peekNext(), std::runtime_error);
+  ASSERT_THROW(q.getNext(), std::runtime_error);
+
   // Insert two events (copy then move)
   ASSERT_NO_THROW(q.insert(e2));
   EXPECT_EQ(1, q.size());
