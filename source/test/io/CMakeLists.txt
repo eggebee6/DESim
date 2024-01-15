@@ -1,8 +1,10 @@
 cmake_minimum_required (VERSION 3.14)
 
 set (SRCS_TEST
-  testJSONEventReader.cpp
-  testJSONEventWriter.cpp
+  testJsonEventReader.cpp
+  testJsonEventWriter.cpp
+  testBinaryEventReader.cpp
+  testBinaryEventWriter.cpp
 )
   
 add_executable (testIO
