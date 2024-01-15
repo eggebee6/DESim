@@ -17,6 +17,8 @@ set (SRCS_CORE
 set (SRCS_IO
   "io/JsonEventReader.cpp"
   "io/JsonEventWriter.cpp"
+  "io/BinaryEventReader.cpp"
+  "io/BinaryEventWriter.cpp"
 )
 
 add_library (des
