@@ -25,8 +25,8 @@ public:
   */
   virtual void write(const Event& e) = 0;
 
-  /** @return  Const reference to internal stream */
-  inline const std::ostream& stream() const noexcept
+  /** @return  Reference to internal stream */
+  inline std::ostream& stream() noexcept
   { return _out; }
 
 protected:
