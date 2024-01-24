@@ -25,8 +25,8 @@ public:
   */
   virtual Event read() = 0;
 
-  /** @return  Const reference to internal stream */
-  inline const std::istream& stream() const noexcept
+  /** @return  Reference to internal stream */
+  inline std::istream& stream() noexcept
   { return _in; }
 
 protected:
