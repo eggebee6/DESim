@@ -28,6 +28,11 @@ int main(int argc, char* argv[])
   {
     // Create file stream and event writer
     std::ofstream file{binaryFileName, std::ios::binary};
+    if(!file.is_open())
+    {
+      throw std::runtime_error("Failed to open file for writing");
+    }
+
     des::BinaryEventWriter writer{file};
 
     std::cout << "Writing events to " << binaryFileName << std::endl;
@@ -49,6 +54,11 @@ int main(int argc, char* argv[])
   {
     // Create file stream and event reader
     std::ifstream file{binaryFileName, std::ios::binary};
+    if(!file.is_open())
+    {
+      throw std::runtime_error("Failed to open file for reading");
+    }
+
     des::BinaryEventReader reader{file};
 
     std::cout << "Reading events from " << binaryFileName << std::endl;
