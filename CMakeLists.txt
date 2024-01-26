@@ -21,7 +21,7 @@ set (PROJECT_EXAMPLES_BINARY_DIR "${PROJECT_EXAMPLES_OUTPUT_DIR}/bin")
 
 # Set options
 option (BUILD_TESTS "Build tests" ON)
-option (BUILD_EXAMPLES "Build examples" ON)
+option (BUILD_EXAMPLES "Build examples" OFF)
 option (BUILD_WITH_COVERAGE "Build with coverage" OFF)
 
 message (STATUS "Variable BUILD_TESTS:  ${BUILD_TESTS}")
